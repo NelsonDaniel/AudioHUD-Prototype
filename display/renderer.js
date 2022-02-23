@@ -1,3 +1,5 @@
+// require("./p5") 
+
 // Global variables.
 let angle
 let angle_vel
@@ -16,7 +18,7 @@ function setup() {
 // Called periodically.
 function draw() {
   clear()
-  background(255)
+  background('rgba(0,255,0, 0.25)')
 
   // Translate the origin point to the center of the screen.
   translate(width / 2, height / 2)
@@ -33,5 +35,6 @@ function draw() {
 
 // Called every time the window is resized.
 function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
   radius = height * 0.45
 }
