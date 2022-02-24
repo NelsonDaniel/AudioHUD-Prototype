@@ -105,3 +105,9 @@ dist
 
 # npm package generated file
 **/package-lock.json
+
+# torch models
+*.pth
+
+# python 
+*__pycache__
