@@ -1,15 +1,19 @@
 const { app, BrowserWindow } = require('electron')
-const path = require('path')
 
 function createWindow () {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 800, maxWidth: 800, minWidth: 800,
+    height: 600, maxHeight: 600, minHeight: 600,
     frame: false,
+    autoHideMenuBar: true,
+    transparent: true,
     useContentSize: true
   })
+  win.setAlwaysOnTop(true, 'screen-saver')
+  win.loadFile('index.html')
 
-  win.loadFile('index.html');
+  // remove comment for debugging
+  // win.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {
@@ -27,4 +31,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-
