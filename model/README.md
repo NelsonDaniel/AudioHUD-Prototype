@@ -1,1 +1,1 @@
-Work in progress: Convert a pytorch model to tensorflow and run in electron.
+TODO: Create electron app that gets audio, process it through a tensorflow.js model and outputs for overlay app.
