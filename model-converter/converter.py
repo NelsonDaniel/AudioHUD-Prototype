@@ -17,8 +17,8 @@ def to_numpy(tensor):
 
 def convert_ONNX(model):
     onnx_model_path = rp("onnx_model\l3das.onnx") 
-    dummy_file = rp("sample_data\split0_ov1_0_A.wav") 
-    test_file = rp("sample_data\split0_ov1_1_A.wav")
+    dummy_file = rp("../sample_data/split0_ov1_0_A.wav") 
+    test_file = rp("../sample_data/split0_ov1_1_A.wav")
 
     dummy, _ = librosa.load(dummy_file, sr=32000, mono=False)
     dummy = utils.spectrum_fast(dummy, nperseg=512, noverlap=112, window="hamming", output_phase=False)
