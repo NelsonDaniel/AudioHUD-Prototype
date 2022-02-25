@@ -102,3 +102,12 @@ dist
 
 # TernJS port file
 .tern-port
+
+# npm package generated file
+**/package-lock.json
+
+# torch models
+*.pth
+
+# python 
+*__pycache__
