@@ -1,10 +1,12 @@
 import torch
+import numpy as np
+from scipy.signal import stft
 
 def load_model(model, optimizer, path, cuda):
     if isinstance(model, torch.nn.DataParallel):
         model = model.module  # load state dict of wrapped module
     if cuda:
-        checkpoint = torch.load(path)
+        checkpoint = torch.load(path, map_location='cuda:0')
     else:
         checkpoint = torch.load(path, map_location='cpu')
     try:
@@ -30,3 +32,33 @@ def load_model(model, optimizer, path, cuda):
         # older checkpoints only store step, rest of state won't be there
         state = {'step': checkpoint['step']}
     return state
+
+def spectrum_fast(x, nperseg=512, noverlap=128, window='hamming', cut_dc=True,
+                  output_phase=True, cut_last_timeframe=True):
+    '''
+    Compute magnitude spectra from monophonic signal
+    '''
+
+    f, t, seg_stft = stft(x,
+                        window=window,
+                        nperseg=nperseg,
+                        noverlap=noverlap)
+
+    #seg_stft = librosa.stft(x, n_fft=nparseg, hop_length=noverlap)
+
+    output = np.abs(seg_stft)
+
+    if output_phase:
+        phase = np.angle(seg_stft)
+        output = np.concatenate((output,phase), axis=-3)
+
+    if cut_dc:
+        output = output[:,1:,:]
+
+    if cut_last_timeframe:
+        output = output[:,:,:-1]
+
+    #return np.rot90(np.abs(seg_stft))
+    return output
+
+    
