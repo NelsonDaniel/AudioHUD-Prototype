@@ -16,7 +16,7 @@ def to_numpy(tensor):
     return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
 def convert_ONNX(model):
-    onnx_model_path = rp("onnx_model\l3das.onnx") 
+    onnx_model_path = rp("../model/onnx_model/l3das.onnx") 
     dummy_file = rp("../sample_data/split0_ov1_0_A.wav") 
     test_file = rp("../sample_data/split0_ov1_1_A.wav")
 
