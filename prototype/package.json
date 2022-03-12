@@ -11,6 +11,7 @@
   "devDependencies": {
     "electron": "^17.1.2",
     "eslint": "^8.11.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-p5js": "^1.1.0"
   }
 }

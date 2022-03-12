@@ -6,6 +6,7 @@
         "node": true
     },
     "extends": [
+        "p5js",
         "google"
     ],
     "parserOptions": {
