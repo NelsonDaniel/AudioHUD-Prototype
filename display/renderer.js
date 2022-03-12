@@ -75,23 +75,50 @@ function draw() {
   noFill();
   drawingContext.shadowBlur = 0;
   background('rgba(255, 255, 255, 0.1)')
+  stroke('rgba(255, 255, 255, 0.1)');
+  circle(windowWidth/2, windowHeight/2, 100);
   mult = Math.random() < 0.5 ? -1 : 1;
   mult2 = Math.random() < 0.5 ? -1 : 1;
   num = Math.random();
   num2 = Math.random();
-  randImg = imgArr[Math.floor(Math.random() * 13)];
+  randImg = imgArr[Math.floor(Math.random() * imgArr.length)];
   let sect = getSector(mult * num, mult2 * num2);
   for(let i = 0; i < dvsn; i++){
     if(i == sect){
+      setGlow();
       image(eval(randImg), iconX(sect) - (iconsz/2), iconY(sect) - (iconsz/2), iconsz, iconsz);
-      stroke(255);
-      drawingContext.shadowBlur = 20;
-      drawingContext.shadowColor = color(207, 7, 70);
+      arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+    }else if(sect == 4.5){
+      setGlow();
+      image(eval(randImg), windowWidth/2 - (iconsz/2), windowHeight/2 - (iconsz/2), iconsz, iconsz);
+      circle(windowWidth/2, windowHeight/2, 100);
+    }else if(sect == 0.5){
+      if(i == 0 || i == 31){
+        setGlow();
+        image(eval(randImg), iconX(31), iconY(31), iconsz, iconsz);
+        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+      }else{ drawInactiveArc(); }
+    }else if(sect == 1.5){
+      if(i == 23 || i == 24){
+        setGlow();
+        image(eval(randImg), iconX(23), iconY(23), iconsz, iconsz);
+        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+      }else{ drawInactiveArc(); }
+    }else if(sect == 2.5){
+      if(i == 15 || i == 16){
+        setGlow();
+        image(eval(randImg), iconX(16), iconY(16), iconsz, iconsz);
+        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+      }else{ drawInactiveArc(); }
+    }else if(sect == 3.5){
+      if(i == 7 || i == 8){
+        setGlow();
+        image(eval(randImg), iconX(8), iconY(8), iconsz, iconsz);
+        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+      }else{ drawInactiveArc(); }
     }else{
-      stroke('rgba(255, 255, 255, 0.1)');
-      drawingContext.shadowBlur = 0;
+      drawInactiveArc();
     }
-    arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
     start += PI/(dvsn/2); 
     end += PI/(dvsn/2);
   }
@@ -145,6 +172,18 @@ function dispIcon(x, y){
   }
 }
 
+function drawInactiveArc(){
+  stroke('rgba(255, 255, 255, 0.1)');
+  drawingContext.shadowBlur = 0;
+  arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+}
+
+function setGlow(){
+  stroke(255);
+  drawingContext.shadowBlur = 20;
+  drawingContext.shadowColor = color(207, 7, 70);
+}
+
 function iconX(sector){
   sector = dvsn - sector; 
   let deg = (180/dvsn) + ((360/dvsn) * (sector - 1));
@@ -158,6 +197,21 @@ function iconY(sector){
  }
 
 function getSector(x, y){
+  if(x > 0 && y == 0){
+    return 0.5;
+  }
+  if(x == 0 && y > 0){
+    return 1.5;
+  }
+  if(x < 0 && y == 0){
+    return 2.5;
+  }
+  if(x == 0 && y < 0){
+    return 3.5;
+  }
+  if(x == 0 && y == 0){
+    return 4.5;
+  }
   angle = Math.abs((180/PI) * Math.atan(y/x));
   quadr = getQuad(x, y); 
   if(quadr == 2){
