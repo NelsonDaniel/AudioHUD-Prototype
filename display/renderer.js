@@ -1,9 +1,6 @@
 // require("./p5") 
 
-// Global variables.
-// let angle
-// let angle_vel
-// let radius
+// Global variables
 var maxDiameter;
 var theta;
 var zero = false;
@@ -51,19 +48,16 @@ function setup() {
   createCanvas(windowWidth, windowHeight)
   maxDiameter = 100; 
 	theta = 0;
-  //x = 100
-  //y = 100
-  iconsz = 40; //adjust icon size
-  dvsn = 32; //number of segments in arc
+  
+  iconsz = 40; //ADJUST ICON SIZE
+  dvsn = 32; //ADJUST NUMBER OF SEGMENTS IN ARC
+
   start = 0;
   end = PI/(dvsn/2);
   imgArr = ["Computer_keyboard", "Cupboard_open_or_close", "Drawer_open_or_close", "Female_speech_and_woman_speaking", 
     "Finger_snapping", "Keys_jangling", "Knock", "Laughter", "Male_speech_and_man_speaking", "Printer", "Scissors", "Telephone",
     "Writing"];
-  // // Init values.
-  // radius = windowHeight * 0.45
-  // angle = 0
-  // angle_vel = 0.01
+  
   noFill();  
   strokeWeight(5);
   frameRate(1);
