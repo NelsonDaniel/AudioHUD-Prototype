@@ -1,62 +1,28 @@
+const {ipcRenderer} = require('electron');
+
 // Global variables.
-let angle;
-let angleVel;
-let radius;
+let x = 0.0;
+let y = 0.0;
+let c = 'NOTHING';
+
+ipcRenderer.on('detection-to-display', (_, detection) => {
+  x = detection.x;
+  y = detection.y;
+  c = detection.c;
+});
 
 // Called once.
 // eslint-disable-next-line no-unused-vars
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // Init values.
-  radius = windowHeight * 0.45;
-  angle = 0;
-  angleVel = 0.01;
 }
 
 // Called periodically.
 // eslint-disable-next-line no-unused-vars
 function draw() {
   clear();
-  background('rgba(255, 255, 255, 0.1)');
-
-  // Translate the origin point to the center of the screen.
-  translate(windowWidth / 2, windowHeight / 2);
-
-  // Convert polar to cartesian.
-  const x = radius * cos(angle);
-  const y = radius * sin(angle);
-
-  const v0 = createVector(0, 0);
-  const v1 = createVector(x, y);
-  drawArrow(v0, v1, 'yellowgreen');
-
-  noStroke();
-
-  // Update angle to move line.
-  angle += angleVel;
-}
-
-// ref: https://p5js.org/reference/#/p5.Vector/magSq
-function drawArrow(base, vec, myColor) {
-  push();
-  stroke(myColor);
-  strokeWeight(5);
-  fill(myColor);
-  translate(base.x, base.y);
-  line(0, 0, vec.x, vec.y);
-  rotate(vec.heading());
-  const arrowSize = 7;
-  translate(vec.mag() - arrowSize, 0);
-  triangle(0, arrowSize / 2, 0, -arrowSize / 2, arrowSize, 0);
-  pop();
-}
-
-// Called every time the window is resized.
-// eslint-disable-next-line no-unused-vars
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  radius = windowHeight * 0.5;
+  textSize(18);
+  text([c, x, y], windowWidth / 2, windowHeight / 2);
 }
 
 // const fs = require('fs');
