@@ -28,8 +28,8 @@ def getAudioDevice():
     return int(input("Enter device ID: "))
 
 
-# Returns a BytesIO object to store audio data
-def save_data():
+# Returns a BytesIO object that stored all the frames
+def save_data(frames):
     audioData = io.BytesIO() # Acts like a file, but in memory
     wf = wave.open(audioData, 'wb')
     wf.setnchannels(channels)
@@ -72,7 +72,7 @@ while 1:
     num_frames += 1
 
     if num_frames == max_frames:
-        wav_data = save_data()
+        wav_data = save_data(frames)
 
         x_byteio, sr = librosa.load(wav_data, sr=32000, mono=False)
         print(x_byteio, '\n')
