@@ -1,9 +1,11 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron');
+const {app, BrowserWindow} = require('electron');
 const path = require('path');
+const zmq = require('zeromq');
 
 let mainWindow;
 let modelWindow;
+const pids = [];
 
 function createWindow() {
   // Create the browser window.
@@ -29,32 +31,9 @@ function createWindow() {
   // mainWindow.webContents.openDevTools();
 }
 
-function createModelWindow() {
-  // hidden worker
-  modelWindow = new BrowserWindow({
-    show: false,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-    },
-  });
-
-  modelWindow.loadFile(path.join(__dirname, 'model/index.html'));
-
-  modelWindow.on('closed', () => {
-    modelWindow = null;
-  });
-
-  modelWindow.on('ready-to-show', () => {
-    modelWindow.webContents.send('run-model');
-  });
-
-  console.log('model worker created');
-}
-
 app.on('ready', () => {
   createWindow();
-  createModelWindow();
+  spawnModelProcess();
 });
 
 app.on('activate', () => {
@@ -76,8 +55,53 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.on('model-detection', (_, detection) => {
-  mainWindow.webContents.send('detection-to-display', detection);
+function spawnModelProcess() {
+  const modelProgramPath = path.join(__dirname, 'model/dist/model.exe');
+  const modelProcess = require('child_process').spawn(modelProgramPath);
+  pids.push(modelProcess.pid);
+
+  modelProcess.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+    console.log(`stderr: ${data}`);
+  });
+
+  modelProcess.on('close', (code) => {
+    console.log(`child process exited with code ${code}`);
+  });
+
+  runClient();
+};
+
+//  Socket to talk to server
+const sock = new zmq.Request();
+async function runClient() {
+  //  Socket to talk to server
+  sock.connect('tcp://localhost:5555');
+  sock.linger = 0;
+  try {
+    while (1) {
+      await sock.send('send detections');
+      const [detection] = await sock.receive();
+      mainWindow.webContents.send('model-detection', detection.toString());
+    }
+  } finally {
+    if (!sock.closed) {
+      sock.close();
+    }
+  }
+}
+
+app.on('before-quit', function() {
+  sock.disconnect('tcp://localhost:5555');
+  sock.close();
+  pids.forEach(function(pid) {
+    // A simple pid lookup
+    process.kill(pid, function( err ) {
+      if (err) {
+        throw new Error( err );
+      } else {
+        console.log( 'Process %s has been killed!', pid );
+      }
+    });
+  });
 });
-
-

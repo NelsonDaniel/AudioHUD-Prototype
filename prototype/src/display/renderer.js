@@ -25,10 +25,11 @@ let Telephone;
 let Writing;
 let Chink_and_clink;
 
-ipcRenderer.on('detection-to-display', (_, detection) => {
-  x = detection.x;
-  y = detection.y;
-  c = detection.c;
+ipcRenderer.on('model-detection', (_, detection) => {
+  parsed = JSON.parse(detection.toString());
+  c = parsed[0];
+  x = parsed[1];
+  y = parsed[2];
 });
 
 // eslint-disable-next-line no-unused-vars
@@ -69,8 +70,8 @@ function draw() {
   clear();
   noFill();
   drawingContext.shadowBlur = 0;
-  background('rgba(255, 255, 255, 0.1)');
-  stroke('rgba(255, 255, 255, 0.1)');
+  background('rgba(255, 255, 255, 0.05)');
+  stroke('rgba(255, 255, 255, 0.05)');
   circle(windowWidth/2, windowHeight/2, 100);
   let sect = getSector(x, y);
   if(c == 'NOTHING'){
@@ -115,7 +116,8 @@ function draw() {
     start += PI/(dvsn/2); 
     end += PI/(dvsn/2);
   }
-  printInfo(); // CAN REMOVE THIS IF PRINTED COORDS NOT NEEDED
+  // uncomment for debugging coordinates
+  // printInfo(); 
 }
 
 function drawInactiveArc(){
@@ -126,7 +128,7 @@ function drawInactiveArc(){
 
 function setGlow(){
   stroke(255);
-  drawingContext.shadowBlur = 20;
+  drawingContext.shadowBlur = 50;
   drawingContext.shadowColor = color(207, 7, 70);
 }
 
