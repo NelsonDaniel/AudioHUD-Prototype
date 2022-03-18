@@ -319,7 +319,6 @@ if __name__ == "__main__":
     for i in range(len(prototype_test_audio)):
         stereo = prototype_test_audio[i]
         pred = call(stereo)
-        print(pred)
         time.sleep(1)
     
 

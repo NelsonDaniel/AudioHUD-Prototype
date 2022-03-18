@@ -1,15 +1,10 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
-const zmq = require('zeromq');
 
-let mainWindow;
-let modelWindow;
-const pids = [];
-
-function createWindow() {
+function createMainWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800, maxWidth: 800, minWidth: 800,
     height: 600, maxHeight: 600, minHeight: 600,
     frame: false,
@@ -29,22 +24,41 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.webContents.send('run-model');
+  });
+
+  ipcMain.on('detection-from-model', (_, detection) => {
+    mainWindow.webContents.send('detection-for-display', detection);
+  });
 }
 
-app.on('ready', () => {
-  createWindow();
-  spawnModelProcess();
+function createModelWindow() {
+  // hidden worker
+  const modelWindow = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  modelWindow.loadFile(path.join(__dirname, 'model/index.html'));
+
+  modelWindow.once('ready-to-show', () => {
+    modelWindow.webContents.send('run-model');
+  });
+}
+
+app.whenReady().then(() => {
+  createMainWindow();
+  createModelWindow();
+  app.on('activate', function() {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
-  }
-
-  if (modelWindow == null) {
-    createWindow();
-  }
-});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -55,53 +69,3 @@ app.on('window-all-closed', () => {
   }
 });
 
-function spawnModelProcess() {
-  const modelProgramPath = path.join(__dirname, 'model/dist/model.exe');
-  const modelProcess = require('child_process').spawn(modelProgramPath);
-  pids.push(modelProcess.pid);
-
-  modelProcess.stderr.on('data', (data) => {
-    console.error(`stderr: ${data}`);
-    console.log(`stderr: ${data}`);
-  });
-
-  modelProcess.on('close', (code) => {
-    console.log(`child process exited with code ${code}`);
-  });
-
-  runClient();
-};
-
-//  Socket to talk to server
-const sock = new zmq.Request();
-async function runClient() {
-  //  Socket to talk to server
-  sock.connect('tcp://localhost:5555');
-  sock.linger = 0;
-  try {
-    while (1) {
-      await sock.send('send detections');
-      const [detection] = await sock.receive();
-      mainWindow.webContents.send('model-detection', detection.toString());
-    }
-  } finally {
-    if (!sock.closed) {
-      sock.close();
-    }
-  }
-}
-
-app.on('before-quit', function() {
-  sock.disconnect('tcp://localhost:5555');
-  sock.close();
-  pids.forEach(function(pid) {
-    // A simple pid lookup
-    process.kill(pid, function( err ) {
-      if (err) {
-        throw new Error( err );
-      } else {
-        console.log( 'Process %s has been killed!', pid );
-      }
-    });
-  });
-});

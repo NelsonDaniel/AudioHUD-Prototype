@@ -25,11 +25,14 @@ let Telephone;
 let Writing;
 let Chink_and_clink;
 
-ipcRenderer.on('model-detection', (_, detection) => {
-  parsed = JSON.parse(detection.toString());
-  c = parsed[0];
-  x = parsed[1];
-  y = parsed[2];
+ipcRenderer.on('detection-for-display', (_, detection) => {
+  //console.log(detection);
+  const parsed = JSON.parse(detection);
+  //console.log(parsed.split(' ')[0].split('[')[1]);
+  c = parsed.split(' ')[0].split('[')[1].replace(`'`,'').replace(`'`,'');
+  x = parsed.split(' ')[1].replace(`'`,'').replace(`'`,'');
+  y = parsed.split(' ')[1].replace(`'`,'').replace(`'`,'');
+  console.log([c, x, y])
 });
 
 // eslint-disable-next-line no-unused-vars
