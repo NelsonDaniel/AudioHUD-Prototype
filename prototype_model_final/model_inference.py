@@ -11,6 +11,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as utils
+import matplotlib.pyplot as plt
+import zmq
+import time
+
 
 # CONSTANTS
 CLS_TO_IDX = {'Chink_and_clink':0,
@@ -215,7 +219,7 @@ def generate_inference_list(sed, doa):
         l = l * MAX_LOC_VALUE
         l = l.reshape(15, 3)
         if np.sum(c) == 0:
-            predictions.append([14, 0, 0, 0])
+            predictions.append([IDX_TO_CLS[14], 0, 0, 0])
         else:
             predicted_class = int(np.argmax(c))
             curr_list = [IDX_TO_CLS[int(predicted_class)], l[predicted_class][0], 
@@ -312,5 +316,10 @@ if __name__ == "__main__":
     Accept 1 second of audio -> process audio -> generate model inference
     '''
     prototype_test_audio = np.load('prototype_test_audio.npy')
-    stereo = prototype_test_audio[0]
-    pred = call(stereo)
+    for i in range(len(prototype_test_audio)):
+        stereo = prototype_test_audio[i]
+        pred = call(stereo)
+        print(pred)
+        time.sleep(1)
+    
+
