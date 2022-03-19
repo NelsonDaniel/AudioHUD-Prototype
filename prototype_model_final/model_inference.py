@@ -3,15 +3,11 @@ import os
 import sys
 import numpy as np
 import librosa
-import librosa.display
-from tqdm import tqdm
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.data as utils
-import matplotlib.pyplot as plt
 import zmq
 import time
 
@@ -145,20 +141,6 @@ def compute_mel_spectrogram(sound, nfft = 2048, hop_length = 400, n_mels = 128, 
     if cut_last_timeframe:
         output = S_DB[:,:,:-1]
     return output
-
-def plot_sample_audio(audio, sr = SAMPLING_FREQUENCY):
-    plt.figure(figsize = (9.4, 6))
-    librosa.display.waveshow(audio, sr=SAMPLING_FREQUENCY)
-    plt.ylabel('Amplitude')
-    plt.grid('on')
-    plt.title('Sample Audio File Plot @ 32kHz')
-    
-def plot_sample_spec(spec, sr = SAMPLING_FREQUENCY, hop_length = 400):
-    fig, ax = plt.subplots(nrows=len(spec), ncols=1, sharex=True, figsize=(10,8))
-    for i in range(len(spec)):
-        im = librosa.display.specshow(spec[i], sr=sr, hop_length=hop_length, x_axis='time', y_axis='mel', ax=ax[i]);
-        ax[i].set_title('Sample Audio Mel dB Spectrogram Plot: Channel '+ str(i))    
-    fig.colorbar(im, format='%+2.0f dB', ax = ax);
     
 def load_stat_dict():
     stat_dict = np.load('stat_dict.npy', allow_pickle = True).item()
@@ -166,20 +148,15 @@ def load_stat_dict():
     std_ = stat_dict['std']
     return mean_, std_
 
-def process_data(stereo):
+def process_data(stereo, mean_, std_):
     '''
     Input of 2 x 32000 (1 second audio)
     '''
     spec = compute_mel_spectrogram(stereo)
     spec = np.expand_dims(spec, axis = 0)
-    mean_, std_ = load_stat_dict()
     spec_norm = (spec - mean_) / std_
     spec_tensor = torch.tensor(spec_norm).float()
-    fake_target = np.zeros((1, 10, 60))
-    fake_target_tensor = torch.tensor(fake_target).float()
-    spec_dataset = utils.TensorDataset(spec_tensor, fake_target_tensor)
-    spec_data = utils.DataLoader(spec_dataset, 1, shuffle = False)
-    return spec_data
+    return spec_tensor
 
 def load_model(model, optimizer, path, cuda):
     if isinstance(model, torch.nn.DataParallel):
@@ -228,87 +205,13 @@ def generate_inference_list(sed, doa):
     
     return predictions
 
-def calculate_location_sensitive_metrics(predictions, targets):
-    TP = 0   #true positives
-    FP = 0   #false positives
-    FN = 0   #false negatives
-    frames = {}
-    for i in range(NUM_FRAMES):
-        frames[i] = {'p':[], 't':[]}
-    for i in predictions:
-        frames[i[0]]['p'].append(i)
-    for i in targets:
-        frames[i[0]]['t'].append(i)
-
-    for frame in range(NUM_FRAMES):
-        t = frames[frame]['t']  #all true events for frame i
-        p = frames[frame]['p']  #all predicted events for frame i
-
-        num_true_items = len(t)
-        num_pred_items = len(p)
-        matched = 0
-        match_ids = []       #all pred ids that matched
-        match_ids_t = []     #all truth ids that matched
-
-        if num_true_items == 0:         #if there are PREDICTED but not TRUE events
-            FP += num_pred_items        #all predicted are false positive
-        elif num_pred_items == 0:       #if there are TRUE but not PREDICTED events
-            FN += num_true_items        #all predicted are false negative
-        elif num_true_items == 0 and num_pred_items == 0:
-            pass
-        else:
-            for i_t in range(len(t)):           #iterate all true events
-                match = False       #flag for matching events
-                #count if in each true event there is or not a matching predicted event
-                true_class = t[i_t][1]          #true class
-                true_coord = t[i_t][-3:]        #true coordinates
-                for i_p in range(len(p)):       #compare each true event with all predicted events
-                    pred_class = p[i_p][1]      #predicted class
-                    pred_coord = p[i_p][-3:]    #predicted coordinates
-                    spat_error = np.linalg.norm(true_coord-pred_coord)  #cartesian distance between spatial coords
-                    if true_class == pred_class and spat_error < SPATIAL_THRESHOLD:  #if predicton is correct (same label + not exceeding spatial error threshold)
-                        match_ids.append(i_p)   #append to pred matched ids
-                        match_ids_t.append(i_t) #append to truth matched ids
-
-            unique_ids = np.unique(match_ids)  #remove duplicates from matches ids lists
-            unique_ids_t = np.unique(match_ids_t)
-            matched = min(len(unique_ids), len(unique_ids_t))   #compute the number of actual matches without duplicates
-
-            fn =  num_true_items - matched
-            fp = num_pred_items - matched
-
-            #add to counts
-            TP += matched          #number of matches are directly true positives
-            FN += fn
-            FP += fp
-
-    precision = TP / (TP + FP + sys.float_info.epsilon)
-    recall = TP / (TP + FN + sys.float_info.epsilon)
-    F_score = 2 * ((precision * recall) / (precision + recall + sys.float_info.epsilon))
-
-    results = {'precision': precision,
-               'recall': recall,
-               'F score': F_score
-               }
-    
-    return TP, FP, FN, F_score
-
-def call(stereo):
-    if torch.cuda.is_available():
-        device=torch.device('cuda:0')
-    else:
-        device=torch.device('cpu')
-    spec_data = process_data(stereo)
-    model = baseline_model()
-    model.to(device)
-    state = load_model(model, None, MODEL_PATH, cuda = True)
-    model.eval()
-    for example_num, (x, target) in enumerate(spec_data):
-        x = x.to(device)
-        sed, doa = model(x)
-        sed = sed.detach().cpu().numpy().squeeze()
-        doa = doa.detach().cpu().numpy().squeeze()
-        predictions = generate_inference_list(sed, doa)
+def call(stereo, mean_, std_, model, device):
+    spec_tensor = process_data(stereo, mean_, std_)
+    spec_tensor = spec_tensor.to(device)
+    sed, doa = model(spec_tensor)
+    sed = sed.detach().cpu().numpy().squeeze()
+    doa = doa.detach().cpu().numpy().squeeze()
+    predictions = generate_inference_list(sed, doa)
     return predictions
 
 if __name__ == "__main__":
@@ -316,10 +219,19 @@ if __name__ == "__main__":
     Accept 1 second of audio -> process audio -> generate model inference
     '''
     prototype_test_audio = np.load('prototype_test_audio.npy')
+    mean_, std_ = load_stat_dict()
+    if torch.cuda.is_available():
+        device=torch.device('cuda:0')
+    else:
+        device=torch.device('cpu')
+    model = baseline_model()
+    model.to(device)
+    state = load_model(model, None, MODEL_PATH, cuda = True)
+    model.eval()
     for i in range(len(prototype_test_audio)):
         stereo = prototype_test_audio[i]
-        pred = call(stereo)
+        pred = call(stereo, mean_, std_, model, device)
         print(pred)
         time.sleep(1)
-    
+
 
