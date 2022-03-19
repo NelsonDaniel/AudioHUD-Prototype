@@ -230,8 +230,12 @@ if __name__ == "__main__":
     model.eval()
     for i in range(len(prototype_test_audio)):
         stereo = prototype_test_audio[i]
+<<<<<<< HEAD
         pred = call(stereo, mean_, std_, model, device)
         print(pred)
+=======
+        pred = call(stereo)
+>>>>>>> 463a5890984aa0c95f5766bfff7863c80ff28f94
         time.sleep(1)
 
 
