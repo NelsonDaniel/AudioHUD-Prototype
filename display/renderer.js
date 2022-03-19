@@ -49,7 +49,7 @@ function setup() {
   maxDiameter = 100; 
 	theta = 0;
   
-  iconsz = 40; //ADJUST ICON SIZE
+  iconsz = 45; //ADJUST ICON SIZE
   dvsn = 32; //ADJUST NUMBER OF SEGMENTS IN ARC
 
   start = 0;
