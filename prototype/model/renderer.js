@@ -24,7 +24,7 @@ function spawnModelProcess() {
   const modelProgramPath = path.join(__dirname, 'model.py');
   command = [
     'conda activate',
-    'py37',
+    'l3das',
     '&& python',
     modelProgramPath,
   ].join(' ');

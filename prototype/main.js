@@ -2,9 +2,9 @@
 const {app, BrowserWindow, ipcMain} = require('electron');
 const path = require('path');
 
-function createMainWindow() {
+function createOverlayWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  const overlayWindow = new BrowserWindow({
     width: 800, maxWidth: 800, minWidth: 800,
     height: 600, maxHeight: 600, minHeight: 600,
     frame: false,
@@ -18,21 +18,38 @@ function createMainWindow() {
   });
 
   // set window to stay on top of any window
-  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.webContents.send('run-model');
+  overlayWindow.once('ready-to-show', () => {
+    overlayWindow.webContents.send('run-model');
   });
 
   ipcMain.on('detection-from-model', (_, detection) => {
-    mainWindow.webContents.send('detection-for-display', detection);
+    overlayWindow.webContents.send('detection-for-display', detection);
   });
 }
+
+// function createCaptureWindow() {
+//   // Create the browser window.
+//   const captureWindow = new BrowserWindow({
+//     width: 800,
+//     height: 600,
+//     webPreferences: {
+//       nodeIntegration: true,
+//     },
+//   });
+
+//   // and load the index.html of the app.
+//   captureWindow.loadFile(path.join(__dirname,
+//                      'capture-server', 'index.html'));
+//   // Open the DevTools.
+//   // mainWindow.webContents.openDevTools();
+// }
 
 function createModelWindow() {
   // hidden worker
@@ -44,7 +61,7 @@ function createModelWindow() {
     },
   });
 
-  modelWindow.loadFile(path.join(__dirname, 'model/index.html'));
+  modelWindow.loadFile(path.join(__dirname, 'model', 'index.html'));
 
   modelWindow.once('ready-to-show', () => {
     modelWindow.webContents.send('run-model');
@@ -52,7 +69,8 @@ function createModelWindow() {
 }
 
 app.whenReady().then(() => {
-  createMainWindow();
+  createOverlayWindow();
+  // createCaptureWindow();
   createModelWindow();
   app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
