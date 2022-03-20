@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron');
+const {app, BrowserWindow, ipcMain, shell} = require('electron');
 const path = require('path');
+const SERVER_PORT = 4000;
 
 function createOverlayWindow() {
   // Create the browser window.
@@ -34,22 +35,26 @@ function createOverlayWindow() {
   });
 }
 
-// function createCaptureWindow() {
-//   // Create the browser window.
-//   const captureWindow = new BrowserWindow({
-//     width: 800,
-//     height: 600,
-//     webPreferences: {
-//       nodeIntegration: true,
-//     },
-//   });
+function createCaptureWindow() {
+  // Create the browser window.
+  const captureWindow = new BrowserWindow({
+    // show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
 
-//   // and load the index.html of the app.
-//   captureWindow.loadFile(path.join(__dirname,
-//                      'capture-server', 'index.html'));
-//   // Open the DevTools.
-//   // mainWindow.webContents.openDevTools();
-// }
+  // and load the index.html of the app.
+  captureWindow.loadFile(path.join(__dirname, 'capture-server', 'server.html'));
+
+  captureWindow.on('ready-to-show', () => {
+    shell.openExternal(`http://localhost:${SERVER_PORT}/broadcast.html`);
+  });
+
+  // Open the DevTools.
+  captureWindow.webContents.openDevTools();
+}
 
 function createModelWindow() {
   // hidden worker
@@ -70,7 +75,7 @@ function createModelWindow() {
 
 app.whenReady().then(() => {
   createOverlayWindow();
-  // createCaptureWindow();
+  createCaptureWindow();
   createModelWindow();
   app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

@@ -72,7 +72,7 @@ async function getStream() {
         audio: {
           noiseSuppression: true,
           channelCount: 2,
-          sampleRate,
+          sampleRate: 32000,
         },
       },
   );
