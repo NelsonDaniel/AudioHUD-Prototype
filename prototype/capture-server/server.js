@@ -1,36 +1,25 @@
 const express = require('express');
 const app = express();
+const server = require('http').createServer(app);
+const port = 8000;
 
-let broadcaster;
-const port = 4000;
+// eslint-disable-next-line new-cap
+const {ExpressPeerServer} = require('peer');
 
-const http = require('http');
-const server = http.createServer(app);
 
-const io = require('socket.io')(server);
+// eslint-disable-next-line new-cap
+const peerServer = ExpressPeerServer(server, {
+  path: '/peer',
+});
+
+app.use(peerServer);
 app.use(express.static(__dirname + '/public'));
+app.get('/', (request, response) => {
+  response.sendFile(__dirname + '/broadcast.html');
+});
 
-io.sockets.on('error', (e) => console.log(e));
-io.sockets.on('connection', (socket) => {
-  socket.on('broadcaster', () => {
-    broadcaster = socket.id;
-    socket.broadcast.emit('broadcaster');
-  });
-  socket.on('watcher', () => {
-    socket.to(broadcaster).emit('watcher', socket.id);
-  });
-  socket.on('offer', (id, message) => {
-    socket.to(id).emit('offer', socket.id, message);
-  });
-  socket.on('answer', (id, message) => {
-    socket.to(id).emit('answer', socket.id, message);
-  });
-  socket.on('candidate', (id, message) => {
-    socket.to(id).emit('candidate', socket.id, message);
-  });
-  socket.on('disconnect', () => {
-    socket.to(broadcaster).emit('disconnectPeer', socket.id);
-  });
+peerServer.on('connection', (conn) => {
+  console.log(conn.getId());
 });
 
 server.listen(port, () => console.log(`Server is running on port ${port}`));

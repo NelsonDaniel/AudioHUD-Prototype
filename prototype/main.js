@@ -1,7 +1,7 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain, shell} = require('electron');
 const path = require('path');
-const SERVER_PORT = 4000;
+const SERVER_PORT = 8000;
 
 function createOverlayWindow() {
   // Create the browser window.
@@ -59,7 +59,7 @@ function createCaptureWindow() {
 function createModelWindow() {
   // hidden worker
   const modelWindow = new BrowserWindow({
-    show: false,
+    // show: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
