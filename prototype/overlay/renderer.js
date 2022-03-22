@@ -73,7 +73,7 @@ function draw() {
   clear();
   noFill();
   drawingContext.shadowBlur = 0;
-  background('rgba(255, 255, 255, 0.05)');
+  //background('rgba(255, 255, 255, 0.05)');
   stroke('rgba(255, 255, 255, 0.05)');
   circle(windowWidth/2, windowHeight/2, 100);
   let sect = getSector(x, y);
@@ -84,7 +84,7 @@ function draw() {
     if(i == sect) {
       setGlow();
       image(eval(c), iconX(sect) - (iconsz/2), iconY(sect) - (iconsz/2), iconsz, iconsz);
-      arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+      arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
     }else if(sect == 4.5){
       setGlow();
       image(eval(c), windowWidth/2 - (iconsz/2), windowHeight/2 - (iconsz/2), iconsz, iconsz);
@@ -93,25 +93,25 @@ function draw() {
       if(i == 0 || i == 31){
         setGlow();
         image(eval(c), iconX(31), iconY(31), iconsz, iconsz);
-        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+        arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
       }else{ drawInactiveArc(); }
     }else if(sect == 1.5){
       if(i == 23 || i == 24){
         setGlow();
         image(eval(c), iconX(23), iconY(23), iconsz, iconsz);
-        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+        arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
       }else{ drawInactiveArc(); }
     }else if(sect == 2.5){
       if(i == 15 || i == 16){
         setGlow();
         image(eval(c), iconX(16), iconY(16), iconsz, iconsz);
-        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+        arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
       }else{ drawInactiveArc(); }
     }else if(sect == 3.5){
       if(i == 7 || i == 8){
         setGlow();
         image(eval(c), iconX(8), iconY(8), iconsz, iconsz);
-        arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+        arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
       }else{ drawInactiveArc(); }
     }else{
       drawInactiveArc();
@@ -126,7 +126,7 @@ function draw() {
 function drawInactiveArc(){
   stroke('rgba(255, 255, 255, 0.1)');
   drawingContext.shadowBlur = 0;
-  arc(windowWidth / 2, windowHeight / 2, 600, 600, start, end);
+  arc(windowWidth / 2, windowHeight / 2, 590, 590, start, end);
 }
 
 function setGlow(){
