@@ -1,49 +1,55 @@
-const {ipcRenderer, dialog} = require('electron');
+const {ipcRenderer} = require('electron');
 const zmq = require('zeromq');
 const path = require('path');
+// const {writeFile} = require('fs');
+// const {MediaRecorder, register} = require('extendable-media-recorder');
+// const {connect} = require('extendable-media-recorder-wav-encoder');
+// connect().then(register);
 
-const peer = new Peer('peer-model', {
-  host: 'localhost',
-  path: '/peer',
-  port: 8000,
-  debug: true,
-});
 
-let mediaRecorder;
-const recordedChunks = [];
+// const peer = new Peer('peer-model', {
+//   host: 'localhost',
+//   path: '/peer',
+//   port: 8000,
+//   debug: true,
+// });
 
-const videoElement = document.querySelector('video');
+// let mediaRecorder;
+// const recordedChunks = [];
 
-peer.on('call', (call) => {
-  console.log('answer!');
-  call.answer();
-  call.on('stream', (remoteStream) => {
-    videoElement.srcObject = remoteStream;
-    videoElement.play();
+// const videoElement = document.querySelector('video');
 
-    // Create the Media Recorder
-    const options = {mimeType: 'video/webm; codecs=vp9'};
-    mediaRecorder = new MediaRecorder(remoteStream, options);
+// peer.on('call', (call) => {
+//   console.log('answer!');
+//   call.answer();
+//   call.on('stream', (remoteStream) => {
+//     videoElement.srcObject = remoteStream;
+//     window.stream = remoteStream;
+//     const audioTracks = remoteStream.getAudioTracks();
+//     window.audioTracks = [...audioTracks];
+//     const audioStream = new MediaStream(audioTracks);
+//     const options = {mimeType: 'audio/wav'};
+//     mediaRecorder = new MediaRecorder(audioStream, options);
 
-    // Register Event Handlers
-    mediaRecorder.ondataavailable = handleDataAvailable;
-    mediaRecorder.onstop = handleStop;
-  });
-});
+//     // Register Event Handlers
+//     mediaRecorder.ondataavailable = handleDataAvailable;
+//     mediaRecorder.onstop = handleStop;
+//   });
+// });const startBtn = document.getElementById('startBtn');
+// startBtn.onclick = (e) => {
+//   mediaRecorder.start();
+//   startBtn.classList.add('is-danger');
+//   startBtn.innerText = 'Recording';
+// };
 
-const startBtn = document.getElementById('startBtn');
-startBtn.onclick = (e) => {
-  mediaRecorder.start();
-  startBtn.classList.add('is-danger');
-  startBtn.innerText = 'Recording';
-};
+//
 
-const stopBtn = document.getElementById('stopBtn');
-stopBtn.onclick = (e) => {
-  mediaRecorder.stop();
-  startBtn.classList.remove('is-danger');
-  startBtn.innerText = 'Start';
-};
+// const stopBtn = document.getElementById('stopBtn');
+// stopBtn.onclick = (e) => {
+//   mediaRecorder.stop();
+//   startBtn.classList.remove('is-danger');
+//   startBtn.innerText = 'Start';
+// };
 
 ipcRenderer.on('run-model', async () => {
   spawnModelProcess();
@@ -84,26 +90,23 @@ function spawnModelProcess() {
   });
 };
 
-// Captures all recorded chunks
-function handleDataAvailable(e) {
-  console.log('video data available');
-  recordedChunks.push(e.data);
-}
+// // Captures all recorded chunks
+// function handleDataAvailable(e) {
+//   console.log('video data available');
+//   recordedChunks.push(e.data);
+// }
 
-// Saves the video file on stop
-async function handleStop(e) {
-  const blob = new Blob(recordedChunks, {
-    type: 'video/webm; codecs=vp9',
-  });
+// // Saves the video file on stop
+// async function handleStop(e) {
+//   const blob = new Blob(recordedChunks, {
+//     type: 'audio/wav',
+//   });
 
-  const buffer = Buffer.from(await blob.arrayBuffer());
+//   const buffer = Buffer.from(await blob.arrayBuffer());
+//   const filePath = `sound-${Date.now()}.wav`;
 
-  const {filePath} = await dialog.showSaveDialog({
-    buttonLabel: 'Save video',
-    defaultPath: `vid-${Date.now()}.webm`,
-  });
-
-  if (filePath) {
-    writeFile(filePath, buffer, () => console.log('video saved successfully!'));
-  }
-}
+//   if (filePath) {
+//     writeFile(filePath, buffer,
+//        () => console.log('audio saved successfully!'));
+//   }
+// }

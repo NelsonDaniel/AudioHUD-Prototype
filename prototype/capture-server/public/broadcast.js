@@ -6,8 +6,9 @@ const peer = new Peer('peer-capture', {
 });
 
 window.peer = peer;
+
 peer.on('open', async (id) => {
-  peer.call('peer-model', await getStream());
+  peer.call('peer-model', window.stream);
 });
 
 const videoElement = document.querySelector('video');
@@ -16,13 +17,21 @@ async function getStream() {
       {
         video: true,
         audio: {
-          noiseSuppression: true,
           channelCount: 2,
           sampleRate: 32000,
         },
       },
   );
 
+  window.stream = stream;
   videoElement.srcObject = stream;
   return stream;
+};
+
+
+const startBtn = document.getElementById('videoSelectBtn');
+startBtn.onclick = (e) => {
+  getStream()
+  startBtn.classList.add('is-danger');
+  startBtn.innerText = 'Recording';
 };
