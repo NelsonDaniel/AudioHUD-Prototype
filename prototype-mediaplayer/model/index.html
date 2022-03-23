@@ -1,0 +1,228 @@
+<!DOCTYPE html> 
+<html lang = "en"> 
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+    type="text/javascript"></script>
+<script type="text/javascript" src="jquery.form.min.js"></script>
+<title>AudioHUD Prototype</title>
+<style>
+	body, html {
+          height: 55%;
+          margin: 0;
+          padding: 0px;
+          background-color: #cf9afa;
+          color: black;
+          font-size: 25px;
+        }
+        .bg {
+          /* The image used */
+          background-image: url("cover.png");
+        
+          /* Full height */
+          height: 100%; 
+        
+          /* Center and scale the image nicely */
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+        }
+.form-container {
+    background: #F0F0F0;
+    border: #e0dfdf 1px solid;
+    padding: 20px;
+    border-radius: 2px;
+    width: 800px;
+    height: 300px;
+}
+
+form {
+    display: block;
+    margin: 10px;
+    background: #d3d3d3;
+    border-radius: 3px;
+    padding: 15px
+}
+
+.progress {
+    display: none;
+    position: relative;
+    margin: 5px;
+    width: 760px;
+    background-color: #ddd;
+    border: 1px solid blue;
+    padding: 1px;
+    left: 15px;
+    border-radius: 3px;
+}
+
+.progress-bar {
+    background-color: green;
+    width: 0%;
+    height: 30px;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+}
+
+.percent {
+    position: absolute;
+    display: inline-block;
+    color: #fff;
+    font-weight: bold;
+    top: 50%;
+    left: 50%;
+    margin-top: -9px;
+    margin-left: -20px;
+    -webkit-border-radius: 4px;
+}
+
+#outputImage {
+    display: none;
+}
+
+.error {
+    color: #ad7b7b;
+    background: #ffb3b3;
+    padding: 10px;
+    box-sizing: border-box;
+    margin: 10px;
+    border-radius: 3px;
+    border: #f1a8a8 1px solid;
+}
+
+input#uploadImage {
+    border: #f1f1f1 1px solid;
+    padding: 6px;
+    border-radius: 3px;
+}
+
+#outputImage img {
+    max-width: 700px;
+}
+
+#submitButton {
+    padding: 7px 20px;
+    background: blue;
+    border: #898a89 1px solid;
+    color: white;
+    margin-left: 10px;
+    border-radius: 3px;
+    font-size: 0.8em;
+}
+
+.error {
+    
+}
+#something {
+  border: 1px solid;
+  text-align: center;
+  font-size: 2rem;
+}
+#something > a {
+  padding: 8px;
+}
+.picon-p-add-news {
+  background: red;
+  padding: 0 4px;
+}
+
+
+	
+
+</style>
+	
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#submitButton').click(function () {
+    	    $('#uploadForm').ajaxForm({
+    	        target: '#outputImage',
+    	        url: 'uploadFile.php',
+    	        beforeSubmit: function () {
+    	        	  $("#outputImage").hide();
+    	        	   if($("#uploadImage").val() == "") {
+    	        		   $("#outputImage").show();
+    	        		   $("#outputImage").html("<div class='error'>Choose a file to upload.</div>");
+                    return false; 
+                }
+    	            $("#progressDivId").css("display", "block");
+    	            var percentValue = '0%';
+
+    	            $('#progressBar').width(percentValue);
+    	            $('#percent').html(percentValue);
+    	        },
+    	        uploadProgress: function (event, position, total, percentComplete) {
+
+    	            var percentValue = percentComplete + '%';
+    	            $("#progressBar").animate({
+    	                width: '' + percentValue + ''
+    	            }, {
+    	                duration: 2000,
+    	                easing: "linear",
+    	                step: function (x) {
+                        percentText = Math.round(x * 100 / percentComplete);
+    	                    $("#percent").text(percentText + "%");
+                        if(percentText == "100") {
+							   var text = document.getElementById("text_div");
+							   var text2 = document.createElement("p");
+							   text2.innerHTML = "Your file has been successfully uploaded... Click the button to Start Demo!";
+							   text.replaceWith(text2);
+							   var my_btn = document.getElementById("my_btn");
+							   var btn = document.createElement("button");
+								btn.setAttribute("style","width:200px");
+								btn.style.height = "50px"
+								btn.style.background = "blue";
+								btn.style.color = "white";
+								btn.innerHTML = "Run Demo";
+								my_btn.replaceWith(btn);
+                        }
+						
+    	                }
+    	            });
+    	        },
+    	        error: function (response, status, e) {
+    	            alert('Oops something went.');
+    	        },
+    	        
+    	        complete: function (xhr) {
+    	            if (xhr.responseText && xhr.responseText != "error")
+    	            {
+    	            	  $("#outputImage").html(xhr.responseText);
+    	            }
+    	            else{  
+    	               	$("#outputImage").show();
+        	            	$("#outputImage").html("<div class='error'>Problem in uploading file.</div>");
+        	            	$("#progressBar").stop();
+    	            }
+    	        }
+    	    });
+    });
+});
+</script>
+
+</head>
+<body style="text-align: center;">
+<div class="bg"></div>
+<br>
+    <div class="form-container" style="margin-left: auto; margin-right: auto;">
+		Prototype Demo 
+        <form action="uploadFile.php" id="uploadForm" name="frmupload"
+            method="post" enctype="multipart/form-data" class = "button1">
+            <input type="file" class = "submitButton" id="uploadImage" name="uploadImage" /> <input
+                id="submitButton" type="submit" name='btnSubmit'
+                value="Upload Video" />
+
+        </form>
+        <div class='progress' id="progressDivId">
+            <div class='progress-bar' id='progressBar'></div>
+            <div class='percent' id='percent'>0%</div>
+        </div>
+        <div style="height: 10px;"></div>
+        <div id='outputImage'></div>
+		<div id='text_div'></div>
+		<div id='my_btn'></div>
+
+    </div>
+</body>
+</html>
