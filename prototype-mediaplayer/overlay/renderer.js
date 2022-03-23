@@ -28,10 +28,10 @@ let Chink_and_clink;
 ipcRenderer.on('detection-for-display', (_, detection) => {
   //console.log(detection);
   const parsed = JSON.parse(detection);
-  //console.log(parsed.split(' ')[0].split('[')[1]);
-  c = parsed.split(' ')[0].split('[')[1].replace(`'`,'').replace(`'`,'');
-  x = parsed.split(' ')[1].replace(`'`,'').replace(`'`,'');
-  y = parsed.split(' ')[1].replace(`'`,'').replace(`'`,'');
+  console.log(parsed);
+  c = parsed.split(' ')[0].split('[')[1].replace(`'`,'').replace(`'`,'').replace(',', '');
+  x = parsed.split(' ')[1].replace(`'`,'').replace(`'`,'').replace(',', '');
+  y = parsed.split(' ')[2].replace(`'`,'').replace(`'`,'').replace(',', '');
   console.log([c, x, y])
 });
 

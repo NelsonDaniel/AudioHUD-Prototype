@@ -24,13 +24,14 @@ function createOverlayWindow() {
   // and load the index.html of the app.
   overlayWindow.loadFile(path.join(__dirname, 'overlay', 'index.html'));
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  // overlayWindow.webContents.openDevTools();
 
   overlayWindow.once('ready-to-show', () => {
     overlayWindow.webContents.send('run-model');
   });
 
   ipcMain.on('detection-from-model', (_, detection) => {
+    console.log(detection);
     overlayWindow.webContents.send('detection-for-display', detection);
   });
 }
@@ -78,7 +79,6 @@ function createModelWindow() {
 
 app.whenReady().then(() => {
   createOverlayWindow();
-  // createCaptureWindow();
   createModelWindow();
   app.on('activate', function() {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
