@@ -286,14 +286,16 @@ def calculate_location_sensitive_metrics(predictions, targets):
     return TP, FP, FN, F_score
 
 def call(stereo):
+    cudaAvail = False
     if torch.cuda.is_available():
         device=torch.device('cuda:0')
+        cudaAvail = True
     else:
         device=torch.device('cpu')
     spec_data = process_data(stereo)
     model = baseline_model()
     model.to(device)
-    state = load_model(model, None, MODEL_PATH, cuda = True)
+    state = load_model(model, None, MODEL_PATH, cuda = cudaAvail)
     model.eval()
     for example_num, (x, target) in enumerate(spec_data):
         x = x.to(device)
@@ -388,6 +390,7 @@ if __name__ == "__main__":
 
 
     threshold = 0.0001
+    
     while True:
         message = socket.recv()
         stereo = round_down(captureOneSec(), threshold)
