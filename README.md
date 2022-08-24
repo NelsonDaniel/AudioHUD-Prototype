@@ -1,7 +1,7 @@
 # AudioHUD
 AudioHUD is a Heads-Up Display (HUD) designed for the DHH community. AudioHUD enhances situational awareness in virtual and real-world environments by providing visual substitutes to sound cues. 
 
-This repository contains the source code used at the Nittany Ai Challlenge for the Prototype Phase.
+This repository contains the source code used for the Prototype Phase of the at the Nittany Ai Challlenge.
 
 ## Acknowledgements
 
